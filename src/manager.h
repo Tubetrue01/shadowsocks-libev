@@ -60,6 +60,7 @@ struct manager_ctx {
     int mtu;
     int ipv6first;
     char *workdir;
+    int streaming_media_only;
 #ifdef HAVE_SETRLIMIT
     int nofile;
 #endif

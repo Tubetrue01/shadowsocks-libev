@@ -129,6 +129,8 @@ build_config(char *prefix, struct manager_ctx *manager, struct server *server)
         fprintf(f, ",\n\"no_delay\": true");
     if (manager->reuse_port)
         fprintf(f, ",\n\"reuse_port\": true");
+    if (manager->streaming_media_only)
+        fprintf(f, ",\n\"streaming_media_only\": true");
     if (server->mode)
         fprintf(f, ",\n\"mode\":\"%s\"", server->mode);
     if (server->plugin)
@@ -876,6 +878,8 @@ main(int argc, char **argv)
     int mode       = TCP_ONLY;
     int mtu        = 0;
     int ipv6first  = 0;
+    int streaming_media_only = 0;
+
 
 #ifdef HAVE_SETRLIMIT
     static int nofile = 0;
@@ -903,6 +907,7 @@ main(int argc, char **argv)
         { "password",        required_argument, NULL, GETOPT_VAL_PASSWORD    },
         { "workdir",         required_argument, NULL, GETOPT_VAL_WORKDIR     },
         { "help",            no_argument,       NULL, GETOPT_VAL_HELP        },
+        { "streaming_media_only",             no_argument, NULL, GETOPT_VAL_STREAMING_MEDIA_ONLY         },
         { NULL,              0,                 NULL, 0                      }
     };
 
@@ -939,6 +944,9 @@ main(int argc, char **argv)
             break;
         case GETOPT_VAL_PLUGIN_OPTS:
             plugin_opts = optarg;
+            break;
+        case GETOPT_VAL_STREAMING_MEDIA_ONLY:
+            streaming_media_only = 1;
             break;
         case 's':
             if (server_num < MAX_REMOTE_NUM) {
@@ -1066,6 +1074,9 @@ main(int argc, char **argv)
         if (manager_address == NULL) {
             manager_address = conf->manager_address;
         }
+        if (streaming_media_only == 0){
+            streaming_media_only = conf->streaming_media_only;
+        }
 #ifdef HAVE_SETRLIMIT
         if (nofile == 0) {
             nofile = conf->nofile;
@@ -1186,6 +1197,7 @@ main(int argc, char **argv)
     manager.plugin_opts     = plugin_opts;
     manager.ipv6first       = ipv6first;
     manager.workdir         = workdir;
+    manager.streaming_media_only = streaming_media_only;
 #ifdef HAVE_SETRLIMIT
     manager.nofile = nofile;
 #endif
