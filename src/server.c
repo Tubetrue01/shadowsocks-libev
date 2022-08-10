@@ -2228,6 +2228,8 @@ main(int argc, char **argv)
 
     if (nameservers != NULL)
         LOGI("using nameserver: %s", nameservers);
+    if (streaming_media_only)
+        LOGI("enable streaming_media_only mode");
 
 #ifdef __MINGW32__
     // Listen on plugin control port
