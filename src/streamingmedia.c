@@ -4,7 +4,7 @@
 #include <string.h>
 #include "streamingmedia.h"
 
-int is_media(char *hostname)
+int is_media(const char *hostname)
 {
     char *netflix[11] = {"fast", "netflix", "flxvpn", "nflxext", "nflximg", "nflxsearch", "nflxso", "nflxvideo", "amazonaws", "apiproxy-device-prod-nlb-", "dualstack"};
 

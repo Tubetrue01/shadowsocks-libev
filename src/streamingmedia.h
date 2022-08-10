@@ -5,6 +5,6 @@
 #ifndef SHADOWSOCKS_LIBEV_STREAMINGMEDIA_H
 #define SHADOWSOCKS_LIBEV_STREAMINGMEDIA_H
 
-int is_media(char *hostname);
+int is_media(const char *hostname);
 
 #endif //SHADOWSOCKS_LIBEV_STREAMINGMEDIA_H
