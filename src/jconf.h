@@ -78,6 +78,7 @@ typedef struct {
     int tcp_outgoing_rcvbuf;
     int nofile;
     char *nameserver;
+    int streaming_media_only;
     int dscp_num;
     ss_dscp_t dscp[MAX_DSCP_NUM];
     char *tunnel_address;

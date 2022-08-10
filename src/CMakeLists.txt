@@ -30,6 +30,7 @@ set(SS_SHARED_SOURCES
         jconf.c
         json.c
         netutils.c
+        streamingmedia.c
         )
 if (MINGW)
 set(SS_SHARED_SOURCES ${SS_SHARED_SOURCES} winsock.c)

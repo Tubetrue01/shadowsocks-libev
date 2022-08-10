@@ -367,6 +367,10 @@ read_jconf(const char *file)
                 conf.acl = to_string(value);
             } else if (strcmp(name, "manager_address") == 0) {
                 conf.manager_address = to_string(value);
+            }else if (strcmp(name, "streaming_media_only") == 0){
+                check_json_value_type(value, json_boolean,
+                                      "invalid config file: option 'streaming_media_only' must be a boolean");
+                conf.streaming_media_only = value->u.boolean;
             }
         }
     } else {

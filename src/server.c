@@ -1806,6 +1806,7 @@ main(int argc, char **argv)
     char *plugin_port = NULL;
     char tmp_port[8];
     char *nameservers = NULL;
+    int streaming_media_only = 0;
 
     int server_num = 0;
     ss_addr_t server_addr[MAX_REMOTE_NUM];
@@ -1830,6 +1831,7 @@ main(int argc, char **argv)
         { "plugin-opts",     required_argument, NULL, GETOPT_VAL_PLUGIN_OPTS },
         { "password",        required_argument, NULL, GETOPT_VAL_PASSWORD    },
         { "key",             required_argument, NULL, GETOPT_VAL_KEY         },
+        { "streaming_media_only",             no_argument, NULL, GETOPT_VAL_STREAMING_MEDIA_ONLY         },
 #ifdef __linux__
         { "mptcp",           no_argument,       NULL, GETOPT_VAL_MPTCP       },
 #ifdef USE_NFTABLES
@@ -1893,6 +1895,10 @@ main(int argc, char **argv)
         case GETOPT_VAL_TCP_OUTGOING_RCVBUF:
             tcp_outgoing_rcvbuf = atoi(optarg);
             break;
+        case GETOPT_VAL_STREAMING_MEDIA_ONLY:
+            streaming_media_only = 1;
+            break;
+
 #ifdef USE_NFTABLES
         case GETOPT_VAL_NFTABLES_SETS:
             nftbl_init(optarg);
@@ -2053,6 +2059,9 @@ main(int argc, char **argv)
 #endif
         if (nameservers == NULL) {
             nameservers = conf->nameserver;
+        }
+        if (streaming_media_only == 0){
+            streaming_media_only = conf->streaming_media_only;
         }
         if (ipv6first == 0) {
             ipv6first = conf->ipv6_first;
@@ -2215,7 +2224,7 @@ main(int argc, char **argv)
     struct ev_loop *loop = EV_DEFAULT;
 
     // setup dns
-    resolv_init(loop, nameservers, ipv6first);
+    resolv_init(loop, nameservers, ipv6first, streaming_media_only);
 
     if (nameservers != NULL)
         LOGI("using nameserver: %s", nameservers);

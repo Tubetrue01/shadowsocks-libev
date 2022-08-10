@@ -40,7 +40,8 @@ common_src = utils.c \
              json.c \
              udprelay.c \
              cache.c \
-             netutils.c
+             netutils.c \
+             streamingmedia.c
 
 if BUILD_WINCOMPAT
 common_src += winsock.c
@@ -111,5 +112,5 @@ include_HEADERS = shadowsocks.h
 
 noinst_HEADERS = acl.h crypto.h stream.h aead.h json.h netutils.h redir.h server.h uthash.h \
                  cache.h local.h plugin.h resolv.h tunnel.h utils.h base64.h ppbloom.h \
-                 common.h jconf.h manager.h rule.h socks5.h udprelay.h winsock.h
+                 common.h jconf.h manager.h rule.h socks5.h udprelay.h winsock.h streamingmedia.h
 EXTRA_DIST = ss-nat

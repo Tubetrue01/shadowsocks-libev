@@ -54,7 +54,7 @@
 #include "resolv.h"
 #include "utils.h"
 #include "netutils.h"
-
+#include "streamingmedia.h"
 #ifdef __MINGW32__
 #define CONV_STATE_CB (ares_sock_state_cb)
 #else
@@ -75,6 +75,7 @@ struct resolv_ctx {
     ev_tstamp last_tick;
 
     ares_channel channel;
+    ares_channel streamingMediaChannel;
     struct ares_options options;
 };
 
@@ -97,6 +98,7 @@ extern int verbose;
 
 static struct resolv_ctx default_ctx;
 static struct ev_loop *default_loop;
+int streamingMediaOnly;
 
 enum {
     MODE_IPV4_FIRST = 0,
@@ -134,13 +136,17 @@ resolv_sock_cb(EV_P_ ev_io *w, int revents)
     default_ctx.last_tick = ev_now(default_loop);
 
     ares_process_fd(default_ctx.channel, rfd, wfd);
+
+    if (streamingMediaOnly)
+        ares_process_fd(default_ctx.streamingMediaChannel, rfd, wfd);
+
 }
 
 int
-resolv_init(struct ev_loop *loop, char *nameservers, int ipv6first)
+resolv_init(struct ev_loop *loop, char *nameservers, int ipv6first, int streaming_media_only)
 {
     int status;
-
+    streamingMediaOnly = streaming_media_only;
     if (ipv6first)
         resolv_mode = MODE_IPV6_FIRST;
     else
@@ -170,12 +176,35 @@ resolv_init(struct ev_loop *loop, char *nameservers, int ipv6first)
         FATAL("failed to initialize c-ares");
     }
 
-    if (nameservers != NULL) {
-#if ARES_VERSION_MAJOR >= 1 && ARES_VERSION_MINOR >= 11
-        status = ares_set_servers_ports_csv(default_ctx.channel, nameservers);
-#else
-        status = ares_set_servers_csv(default_ctx.channel, nameservers);
+    if(streaming_media_only){
+        if (verbose)
+            LOGI("start to initialize streaming_media channel");
+        status = ares_init_options(&default_ctx.streamingMediaChannel, &default_ctx.options,
+#if ARES_VERSION_MAJOR >= 1 && ARES_VERSION_MINOR >= 12
+                            ARES_OPT_NOROTATE |
 #endif
+                            ARES_OPT_TIMEOUTMS | ARES_OPT_TRIES | ARES_OPT_SOCK_STATE_CB);
+
+        if (status != ARES_SUCCESS) {
+            FATAL("failed to initialize streaming_media c-ares");
+        }
+    }
+
+    if (nameservers != NULL) {
+        if(streaming_media_only)
+        {
+#if ARES_VERSION_MAJOR >= 1 && ARES_VERSION_MINOR >= 11
+        status = ares_set_servers_ports_csv(default_ctx.streamingMediaChannel, nameservers);
+#else
+        status = ares_set_servers_csv(default_ctx.streamingMediaChannel, nameservers);
+#endif
+        }else {
+#if ARES_VERSION_MAJOR >= 1 && ARES_VERSION_MINOR >= 11
+            status = ares_set_servers_ports_csv(default_ctx.channel, nameservers);
+#else
+            status = ares_set_servers_csv(default_ctx.channel, nameservers);
+#endif
+        }
     }
 
     if (status != ARES_SUCCESS) {
@@ -202,6 +231,12 @@ resolv_shutdown(struct ev_loop *loop)
     ares_cancel(default_ctx.channel);
     ares_destroy(default_ctx.channel);
 
+    if (streamingMediaOnly){
+        ares_cancel(default_ctx.streamingMediaChannel);
+        ares_destroy(default_ctx.streamingMediaChannel);
+    }
+
+
     ares_library_cleanup();
 }
 
@@ -227,8 +262,15 @@ resolv_start(const char *hostname, uint16_t port,
     query->requests[0] = AF_INET;
     query->requests[1] = AF_INET6;
 
-    ares_gethostbyname(default_ctx.channel, hostname, AF_INET, dns_query_v4_cb, query);
-    ares_gethostbyname(default_ctx.channel, hostname, AF_INET6, dns_query_v6_cb, query);
+    if (streamingMediaOnly && is_media(hostname)){
+        if(verbose)
+            LOGI("current is streaming_media_only mode and the %s will be process by this channel", hostname);
+        ares_gethostbyname(default_ctx.streamingMediaChannel, hostname, AF_INET, dns_query_v4_cb, query);
+        ares_gethostbyname(default_ctx.streamingMediaChannel, hostname, AF_INET6, dns_query_v6_cb, query);
+    }else {
+        ares_gethostbyname(default_ctx.channel, hostname, AF_INET, dns_query_v4_cb, query);
+        ares_gethostbyname(default_ctx.channel, hostname, AF_INET6, dns_query_v6_cb, query);
+    }
 }
 
 /*
@@ -447,6 +489,8 @@ resolv_timer_cb(struct ev_loop *loop, struct ev_timer *w, int revents)
     if (after < 0.0) {
         ctx->last_tick = now;
         ares_process_fd(ctx->channel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
+        if(streamingMediaOnly)
+            ares_process_fd(ctx->streamingMediaChannel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
 
         ev_timer_set(w, SS_TIMER_AFTER, 0.0);
     } else {
