@@ -264,7 +264,7 @@ resolv_start(const char *hostname, uint16_t port,
 
     if (streamingMediaOnly && is_media(hostname)){
         if(verbose)
-            LOGI("current is streaming_media_only mode and the %s will be process by this channel", hostname);
+            LOGI("current is streaming_media_only mode and the %s will be processed by this channel", hostname);
         ares_gethostbyname(default_ctx.streamingMediaChannel, hostname, AF_INET, dns_query_v4_cb, query);
         ares_gethostbyname(default_ctx.streamingMediaChannel, hostname, AF_INET6, dns_query_v6_cb, query);
     }else {
