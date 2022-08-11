@@ -8,9 +8,11 @@ int is_media(const char *hostname)
 {
     char *netflix[11] = {"fast", "netflix", "flxvpn", "nflxext", "nflximg", "nflxsearch", "nflxso", "nflxvideo", "amazonaws", "apiproxy-device-prod-nlb-", "dualstack"};
 
+    char *sub_str;
     for (int i = 0; i < 11; i++)
     {
-        if (strcasestr(hostname, netflix[i]))
+        sub_str = strcasestr(hostname, netflix[i])
+        if (sub_str)
         {
             return 1;
         }
