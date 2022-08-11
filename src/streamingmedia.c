@@ -11,7 +11,7 @@ int is_media(const char *hostname)
     char *sub_str;
     for (int i = 0; i < 11; i++)
     {
-        sub_str = strcasestr(hostname, netflix[i])
+        sub_str = strcasestr(hostname, netflix[i]);
         if (sub_str)
         {
             return 1;
