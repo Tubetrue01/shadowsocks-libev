@@ -123,6 +123,7 @@ int tcp_incoming_sndbuf = 0;
 int tcp_incoming_rcvbuf = 0;
 int tcp_outgoing_sndbuf = 0;
 int tcp_outgoing_rcvbuf = 0;
+int streaming_media_only = 0;
 
 int is_bind_local_addr = 0;
 struct sockaddr_storage local_addr_v4;
@@ -1806,7 +1807,6 @@ main(int argc, char **argv)
     char *plugin_port = NULL;
     char tmp_port[8];
     char *nameservers = NULL;
-    int streaming_media_only = 0;
 
     int server_num = 0;
     ss_addr_t server_addr[MAX_REMOTE_NUM];
@@ -2224,7 +2224,7 @@ main(int argc, char **argv)
     struct ev_loop *loop = EV_DEFAULT;
 
     // setup dns
-    resolv_init(loop, nameservers, ipv6first, streaming_media_only);
+    resolv_init(loop, nameservers, ipv6first);
 
     if (nameservers != NULL)
         LOGI("using nameserver: %s", nameservers);

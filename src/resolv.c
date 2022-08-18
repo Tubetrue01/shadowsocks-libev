@@ -95,10 +95,10 @@ struct resolv_query {
 };
 
 extern int verbose;
+extern int streaming_media_only;
 
 static struct resolv_ctx default_ctx;
 static struct ev_loop *default_loop;
-int streamingMediaOnly;
 
 enum {
     MODE_IPV4_FIRST = 0,
@@ -137,16 +137,15 @@ resolv_sock_cb(EV_P_ ev_io *w, int revents)
 
     ares_process_fd(default_ctx.channel, rfd, wfd);
 
-    if (streamingMediaOnly)
+    if (streaming_media_only)
         ares_process_fd(default_ctx.streamingMediaChannel, rfd, wfd);
 
 }
 
 int
-resolv_init(struct ev_loop *loop, char *nameservers, int ipv6first, int streaming_media_only)
+resolv_init(struct ev_loop *loop, char *nameservers, int ipv6first)
 {
     int status;
-    streamingMediaOnly = streaming_media_only;
     if (ipv6first)
         resolv_mode = MODE_IPV6_FIRST;
     else
@@ -231,7 +230,7 @@ resolv_shutdown(struct ev_loop *loop)
     ares_cancel(default_ctx.channel);
     ares_destroy(default_ctx.channel);
 
-    if (streamingMediaOnly){
+    if (streaming_media_only){
         ares_cancel(default_ctx.streamingMediaChannel);
         ares_destroy(default_ctx.streamingMediaChannel);
     }
@@ -262,7 +261,7 @@ resolv_start(const char *hostname, uint16_t port,
     query->requests[0] = AF_INET;
     query->requests[1] = AF_INET6;
 
-    if (streamingMediaOnly && is_media(hostname)){
+    if (streaming_media_only && is_media(hostname)){
         if(verbose)
             LOGI("current is streaming_media_only mode and the %s will be processed by this channel", hostname);
         ares_gethostbyname(default_ctx.streamingMediaChannel, hostname, AF_INET, dns_query_v4_cb, query);
@@ -489,7 +488,7 @@ resolv_timer_cb(struct ev_loop *loop, struct ev_timer *w, int revents)
     if (after < 0.0) {
         ctx->last_tick = now;
         ares_process_fd(ctx->channel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
-        if(streamingMediaOnly)
+        if(streaming_media_only)
             ares_process_fd(ctx->streamingMediaChannel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
 
         ev_timer_set(w, SS_TIMER_AFTER, 0.0);
