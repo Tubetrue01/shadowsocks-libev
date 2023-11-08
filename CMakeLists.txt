@@ -31,7 +31,8 @@ endif ()
 
 message(STATUS "Running cmake version ${CMAKE_VERSION}")
 
-option(WITH_STATIC "build with static libraries." ON)
+option(WITH_STATIC "build with static libraries." OFF)
+set(WITH_STATIC false)
 option(WITH_EMBEDDED_SRC "build with embedded libcork, libipset, and libbloom source." ON)
 
 # Will set GIT_EXECUTABLE and GIT_FOUND
@@ -47,7 +48,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/configure.cmake)
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.h.cmake ${PROJECT_BINARY_DIR}/src/config.h)
 add_definitions(-I${PROJECT_BINARY_DIR}/src)
 add_definitions(-DHAVE_CONFIG_H)
-
+add_definitions(-DHAVE_PCRE_H)
 # pkg-config
 configure_file(
         ${PROJECT_SOURCE_DIR}/cmake/shadowsocks-libev.pc.cmake
@@ -156,5 +157,5 @@ set_target_properties(bloom-shared PROPERTIES OUTPUT_NAME bloom)
 endif ()
 
 add_subdirectory(src)
-add_subdirectory(doc)
+#add_subdirectory(doc)
 

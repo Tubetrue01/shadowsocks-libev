@@ -7,6 +7,8 @@ else ()
     option(WITH_SS_MANAGER "Build ss-manager" OFF)
 endif ()
 
+set(LIB_PATH /Users/tubetrue01/Desktop/C/libs)
+set(LIB_INCLUDES /Users/tubetrue01/Desktop/C/includes)
 
 set(SS_ACL_SOURCE
         acl.c
@@ -93,6 +95,7 @@ find_path(LIBSODIUM_INCLUDE_DIR sodium.h
         /usr/local/libsodium/include
         /opt/libsodium/include
         /usr/local/include
+        ${LIB_INCLUDES}
 )
 include_directories(${LIBSODIUM_INCLUDE_DIR})
 endif ()
@@ -123,12 +126,12 @@ add_compile_definitions(CARES_STATICLIB PCRE_STATIC)
 endif ()
 endif ()
 
-find_library(LIBSODIUM_SHARED sodium)
-find_library(LIBMBEDTLS_SHARED mbedtls)
-find_library(LIBMBEDCRYPTO_SHARED mbedcrypto)
-find_library(LIBEV_SHARED ev)
-find_library(LIBUDNS_SHARED cares)
-find_library(LIBPCRE_SHARED pcre)
+find_library(LIBSODIUM_SHARED sodium PATH ${LIB_PATH})
+find_library(LIBMBEDTLS_SHARED mbedtls PATH ${LIB_PATH})
+find_library(LIBMBEDCRYPTO_SHARED mbedcrypto PATH ${LIB_PATH})
+find_library(LIBEV_SHARED ev PATH ${LIB_PATH})
+find_library(LIBUDNS_SHARED cares PATH ${LIB_PATH})
+find_library(LIBPCRE_SHARED pcre PATH ${LIB_PATH})
 
 if (WITH_EMBEDDED_SRC)
 list(APPEND DEPS_SHARED
